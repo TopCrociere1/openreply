@@ -1,0 +1,34 @@
+# Top Crociere — OpenReply su Dokploy (Hetzner).
+# Database (Neon) e coda (Redis Cloud) sono esterni: qui girano solo
+# il sito e il programma che invia i DM, dallo stesso Dockerfile.
+# Le variabili si impostano nella scheda Environment di Dokploy
+# (Dokploy le scrive nel file .env accanto a questo compose).
+
+services:
+  web:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    # Le migrazioni vanno all'avvio: durante la build il database non è raggiungibile.
+    command: ["sh", "-c", "npx prisma migrate deploy && npm run start"]
+    expose:
+      - "3000"
+    mem_limit: 700m
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O-", "http://127.0.0.1:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 90s
+
+  worker:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    # Invia i DM, ricontrolla i commenti ogni 5 minuti e rinnova ogni giorno
+    # il token Instagram (vedi worker/dm-worker.ts).
+    command: ["npm", "run", "worker"]
+    mem_limit: 500m
+    depends_on:
+      web:
+        condition: service_healthy
