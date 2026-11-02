@@ -1,27 +1,36 @@
+import itCatalog from "./it.json";
 import ptBRCatalog from "./pt-BR.json";
 import ruCatalog from "./ru.json";
 import zhTW from "./zh-TW.json";
 
 export const LOCALE_COOKIE = "openreply-locale";
-export type Locale = "en" | "zh-TW" | "pt-BR" | "ru";
+export type Locale = "en" | "it" | "zh-TW" | "pt-BR" | "ru";
 export type MessageKey = keyof typeof zhTW;
 
 // Every catalog must translate exactly the same English keys. `satisfies` makes
 // a missing key a compile error instead of an `undefined` at render time.
+const it = itCatalog satisfies Record<MessageKey, string>;
 const ptBR = ptBRCatalog satisfies Record<MessageKey, string>;
 const ru = ruCatalog satisfies Record<MessageKey, string>;
 const catalogs: Record<Exclude<Locale, "en">, Record<MessageKey, string>> = {
+  it,
   "zh-TW": zhTW,
   "pt-BR": ptBR,
   ru,
 };
 
 export function isLocale(value: unknown): value is Locale {
-  return value === "en" || value === "zh-TW" || value === "pt-BR" || value === "ru";
+  return (
+    value === "en" ||
+    value === "it" ||
+    value === "zh-TW" ||
+    value === "pt-BR" ||
+    value === "ru"
+  );
 }
 
 export function resolveLocale(value: unknown): Locale {
-  return isLocale(value) ? value : "en";
+  return isLocale(value) ? value : "it";
 }
 
 type Placeholders<S extends string> =

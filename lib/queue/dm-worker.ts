@@ -48,6 +48,7 @@ import {
 import { recordWorkerAlert } from "@/lib/ops/worker-health";
 import {
   buildTrackedUrl,
+  usernameForDestination,
   renderMessageWithTracking,
   renderMessageWithoutLink,
 } from "@/lib/tracking/message";
@@ -150,12 +151,18 @@ type WorkerTrackedLink = {
 function buildLinkButtons(
   trackedLinks: WorkerTrackedLink[],
   primaryLabel: string | null,
-  recipientToken: string
+  recipientToken: string,
+  commenterName?: string | null
 ): { title: string; url: string }[] {
   return trackedLinks.slice(0, 3).map((link, index) => ({
-    url: buildTrackedUrl(link.slug, undefined, recipientToken),
+    url: buildTrackedUrl(
+      link.slug,
+      undefined,
+      recipientToken,
+      usernameForDestination(link.destinationUrl, commenterName)
+    ),
     title:
-      (index === 0 ? primaryLabel : link.label) || link.label || "Open link",
+      (index === 0 ? primaryLabel : link.label) || link.label || "Apri",
   }));
 }
 
@@ -180,7 +187,14 @@ function buildInlineLinkFallback(
     }) || bodyText;
   const extraUrls = trackedLinks
     .slice(1)
-    .map((link) => buildTrackedUrl(link.slug, undefined, recipientToken));
+    .map((link) =>
+      buildTrackedUrl(
+        link.slug,
+        undefined,
+        recipientToken,
+        usernameForDestination(link.destinationUrl, commenterName)
+      )
+    );
   return extraUrls.length > 0 ? `${base}\n${extraUrls.join("\n")}` : base;
 }
 
@@ -228,12 +242,13 @@ async function sendRevealDirectMessage({
     renderMessageWithoutLink({
       message: automation.dmMessage,
       commenterName,
-    }) || "Here's your link:";
+    }) || "Ecco il link:";
   const recipientToken = hashRecipientId(userId);
   const buttons = buildLinkButtons(
     automation.trackedLinks,
     automation.linkButtonLabel,
-    recipientToken
+    recipientToken,
+    commenterName
   );
 
   try {
@@ -703,11 +718,12 @@ async function processComment(job: Job<ProcessCommentJob>): Promise<void> {
           renderMessageWithoutLink({
             message: automation.dmMessage,
             commenterName,
-          }) || "Here's your link:";
+          }) || "Ecco il link:";
         const buttons = buildLinkButtons(
           automation.trackedLinks,
           automation.linkButtonLabel,
-          hashRecipientId(commenterId)
+          hashRecipientId(commenterId),
+          commenterName
         );
 
         try {

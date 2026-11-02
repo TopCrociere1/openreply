@@ -5,9 +5,9 @@ import ru from "../lib/i18n/ru.json";
 import zhTW from "../lib/i18n/zh-TW.json";
 
 describe("interface translations", () => {
-  it("keeps English as the default for absent or unsupported preferences", () => {
+  it("uses Italian as the default for absent or unsupported preferences", () => {
     for (const value of [undefined, null, "", "fr", "zh-CN", "../zh-TW", "pt", "pt-PT", "ru-RU"]) {
-      expect(resolveLocale(value)).toBe("en");
+      expect(resolveLocale(value)).toBe("it");
     }
     expect(resolveLocale("zh-TW")).toBe("zh-TW");
     expect(resolveLocale("pt-BR")).toBe("pt-BR");

@@ -5,6 +5,10 @@ import {
   hashClickIp,
   parseRecipientToken,
 } from "@/lib/tracking/server";
+import {
+  fillDestinationUsername,
+  sanitizeUsername,
+} from "@/lib/tracking/message";
 
 type RedirectRouteProps = {
   params: Promise<{ slug: string }>;
@@ -46,5 +50,9 @@ export async function GET(request: NextRequest, { params }: RedirectRouteProps) 
     },
   });
 
-  return NextResponse.redirect(trackedLink.destinationUrl, { status: 302 });
+  const username = sanitizeUsername(new URL(request.url).searchParams.get("u"));
+  return NextResponse.redirect(
+    fillDestinationUsername(trackedLink.destinationUrl, username),
+    { status: 302 }
+  );
 }

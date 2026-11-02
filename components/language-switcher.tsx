@@ -30,6 +30,9 @@ export default function LanguageSwitcher() {
           }}
           className="min-h-9 rounded border border-border bg-surface px-2 text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent disabled:opacity-60"
         >
+          <option value="it" lang="it">
+            Italiano
+          </option>
           <option value="en" lang="en">
             English
           </option>
