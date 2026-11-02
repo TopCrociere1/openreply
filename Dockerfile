@@ -20,6 +20,10 @@
 
 FROM node:22-slim AS build
 WORKDIR /app
+# Prisma's engines need OpenSSL, which node:*-slim does not ship.
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends openssl ca-certificates \
+ && rm -rf /var/lib/apt/lists/*
 
 COPY package.json package-lock.json ./
 RUN npm ci
@@ -36,7 +40,7 @@ ENV NODE_ENV=production
 # scripts/cron.sh calls the /api/cron routes with wget, which node:20-slim does
 # not include.
 RUN apt-get update \
- && apt-get install -y --no-install-recommends wget ca-certificates \
+ && apt-get install -y --no-install-recommends wget ca-certificates openssl \
  && rm -rf /var/lib/apt/lists/*
 
 COPY --from=build /app/node_modules ./node_modules
