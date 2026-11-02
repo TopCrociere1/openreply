@@ -15,7 +15,9 @@ services:
       - "3000"
     mem_limit: 700m
     healthcheck:
-      test: ["CMD", "wget", "-q", "-O-", "http://127.0.0.1:3000/api/health"]
+      # /api/health risponde 503 finché il worker non è attivo: qui basta
+      # che il sito risponda. Lo stato completo si legge su /api/health.
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:3000/login"]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -29,6 +31,3 @@ services:
     # il token Instagram (vedi worker/dm-worker.ts).
     command: ["npm", "run", "worker"]
     mem_limit: 500m
-    depends_on:
-      web:
-        condition: service_healthy
